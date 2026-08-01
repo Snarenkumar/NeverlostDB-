@@ -43,19 +43,48 @@ export default function DatabaseCard({ index, db, onChange }) {
       </div>
 
       <div className="form-group">
-        <label className="form-label" htmlFor={`db-url-${index}`}>Connection URL</label>
+        <label className="form-label" htmlFor={`db-url-${index}`}>
+          {db.type === 'supabase' ? 'Supabase URL / Direct Connection URI' : 'Connection URL'}
+        </label>
         <input
           id={`db-url-${index}`}
           type="text"
           className="form-input"
-          placeholder={db.type === 'mongodb' ? 'mongodb+srv://user:pass@cluster.mongodb.net/mydb' : 'postgresql://user:pass@host:5432/mydb'}
+          placeholder={
+            db.type === 'mongodb'
+              ? 'mongodb+srv://user:pass@cluster.mongodb.net/mydb'
+              : 'postgresql://postgres:password@host:5432/postgres'
+          }
           value={db.url}
           onChange={(e) => handleChange('url', e.target.value)}
         />
         <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-          This stays in your browser — we never send or store it.
+          {db.type === 'supabase'
+            ? 'Use direct postgres URI for direct DB access, or Supabase REST URL'
+            : 'This stays in your browser — we never send or store it.'}
         </span>
       </div>
+
+      {db.type === 'supabase' && (
+        <div style={{ padding: '12px', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', marginTop: '12px' }}>
+          <div className="form-group">
+            <label className="form-label" htmlFor={`db-key-${index}`}>
+              Service Role Key (Private API Key - Optional)
+            </label>
+            <input
+              id={`db-key-${index}`}
+              type="password"
+              className="form-input"
+              placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              value={db.key || ''}
+              onChange={(e) => handleChange('key', e.target.value)}
+            />
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '4px', display: 'block' }}>
+              Required only if connecting via HTTP REST API instead of a direct Postgres connection.
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="form-group">
         <label className="form-label">Role</label>
