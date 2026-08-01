@@ -22,7 +22,7 @@ export default function Footer() {
             <li><Link href="/configure">Configure</Link></li>
             <li><Link href="/docs">Docs</Link></li>
             <li><Link href="/how-it-works">How It Works</Link></li>
-            <li><a href="https://www.npmjs.com/package/db-guardian" target="_blank" rel="noopener noreferrer">npm</a></li>
+            <li><a href="https://www.npmjs.com/package/neverlost-db" target="_blank" rel="noopener noreferrer">npm</a></li>
           </ul>
         </div>
       </div>

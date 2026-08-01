@@ -76,7 +76,7 @@ export default function Home() {
               overflow: 'auto',
               margin: 0,
             }}>
-              <span style={{ color: '#7EE787' }}>$</span> npm install db-guardian{'\n'}
+              <span style={{ color: '#7EE787' }}>$</span> npm install neverlost-db{'\n'}
               <span style={{ color: '#7EE787' }}>$</span> node setup.js{'\n'}
               <span style={{ color: '#8B949E' }}>{'>'} </span>
               <span style={{ color: '#58A6FF' }}>DB Guardian</span> is now protecting your databases!{'\n'}

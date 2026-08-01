@@ -116,7 +116,7 @@ export default function DocsPage() {
                   <strong>Copy Code:</strong> Click <em>Generate Code</em>. Copy the <code>.env.example</code> snippet and the <code>setup.js</code> code into your backend project.
                 </li>
                 <li>
-                  <strong>Run in Backend:</strong> Run <code>npm install db-guardian</code> and start the script in your Node.js backend server. Your databases are now automatically protected!
+                  <strong>Run in Backend:</strong> Run <code>npm install neverlost-db</code> and start the script in your Node.js backend server. Your databases are now automatically protected!
                 </li>
               </ol>
             </section>
@@ -160,7 +160,7 @@ export default function DocsPage() {
 
               <h3>Step 3: Add to Your Node.js Backend</h3>
               <p>Open your existing Node.js project terminal and install the guardian package:</p>
-              <CodeBlock code="npm install db-guardian" language="bash" filename="terminal" />
+              <CodeBlock code="npm install neverlost-db" language="bash" filename="terminal" />
 
               <p>Create a file named <code>.env</code> in your backend root directory and add your real database connection URLs:</p>
               <CodeBlock
@@ -177,7 +177,7 @@ DB2_URL=mongodb+srv://admin:yourpassword@backup.mongodb.net/my_backup_db`}
               <CodeBlock
                 language="javascript"
                 filename="guardian.js"
-                code={`const { DBGuardian } = require('db-guardian');
+                code={`const { DBGuardian } = require('neverlost-db');
 require('dotenv').config();
 
 const guardian = new DBGuardian({
@@ -226,13 +226,13 @@ guardian.start()
               </p>
 
               <h3>Installation</h3>
-              <CodeBlock code="npm install db-guardian" language="bash" filename="terminal" />
+              <CodeBlock code="npm install neverlost-db" language="bash" filename="terminal" />
 
               <h3>Minimal Setup</h3>
               <CodeBlock
                 language="javascript"
                 filename="setup.js"
-                code={`const { DBGuardian } = require('db-guardian');
+                code={`const { DBGuardian } = require('neverlost-db');
 require('dotenv').config();
 
 const guardian = new DBGuardian({

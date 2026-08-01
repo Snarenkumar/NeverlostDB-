@@ -13,7 +13,7 @@ The application allows developers to visually configure their database infrastru
 - **Core Features Overview**: Detailed breakdown of 3 core mechanisms:
   - **Auto-Backup**: Automated data replication between primary and secondary databases (Mirror vs. Merge modes).
   - **Keep-Alive Pinging**: Periodic pings to keep backend services and databases active.
-  - **Failover Protection**: Monitoring primary database health and sending instant notifications when issues arise.
+  - **Failover Protection**: Monitoring primary database health and sending instant notifications w hen issues arise.
 - **How It Works Quick Guide**: 3-step visual onboarding guide.
 
 ### 2. Multi-Step Configure Wizard (`/configure`)
