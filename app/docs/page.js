@@ -8,10 +8,12 @@ import CodeBlock from '@/components/CodeBlock';
 import FAQAccordion from '@/components/FAQAccordion';
 
 const SECTIONS = [
-  { id: 'getting-started', label: 'Getting Started' },
+  { id: 'beginner-guide', label: 'Beginner Guide: What & Why?' },
+  { id: 'production-mongodb-guide', label: 'Guide: I Already Have MongoDB Data' },
+  { id: 'getting-started', label: 'Quick Start Code' },
   { id: 'connecting-mongodb', label: 'Connecting MongoDB' },
   { id: 'connecting-supabase', label: 'Connecting Supabase' },
-  { id: 'backup-modes', label: 'Backup Modes' },
+  { id: 'backup-modes', label: 'Backup Modes (Mirror vs Merge)' },
   { id: 'keep-alive', label: 'Setting Up Keep-Alive' },
   { id: 'failover', label: 'Setting Up Failover' },
   { id: 'alerts', label: 'Alerts Setup' },
@@ -21,25 +23,29 @@ const SECTIONS = [
 
 const FAQ_ITEMS = [
   {
-    question: 'Will this slow down my database?',
-    answer: 'No. DB Guardian uses lightweight read queries for backups and minimal ping operations for keep-alive. The impact on your database performance is negligible — comparable to a single user making a read request. Backup operations are performed sequentially, not in parallel, to avoid overwhelming your database.',
+    question: 'Will this slow down my production MongoDB database?',
+    answer: 'No. NeverlostDB (DB Guardian) uses lightweight read queries for backups and minimal ping operations for keep-alive. The impact on your database performance is negligible — comparable to a single user loading a single page. Operations run in the background on your schedule.',
   },
   {
-    question: 'Is my connection URL sent to your servers?',
-    answer: 'Absolutely not. Everything happens in your browser. The Configure page generates code locally using JavaScript — your database URLs are never transmitted, stored, or logged by us. The generated code references environment variables (process.env.DB1_URL) so your actual URLs stay in your .env file.',
+    question: 'Is my MongoDB connection URL stored or sent anywhere?',
+    answer: 'Absolutely not. Everything happens in your browser locally when you generate code. Your actual MongoDB connection string is placed inside your own project\'s .env file on your own server. We never see, store, or log your connection string or database contents.',
   },
   {
-    question: 'What happens if both databases go down?',
-    answer: 'If all connected databases become unreachable, DB Guardian will trigger your configured alerts (Telegram, Slack, or email) so you are immediately notified. It will continue retrying connections with exponential backoff. Your most recent backup remains safe on whichever database was last successfully written to.',
+    question: 'What if my primary production MongoDB database crashes?',
+    answer: 'DB Guardian detects the failure immediately. It will trigger your instant alert (via Telegram, Slack, or Email) so you are notified within seconds. Your backup database (secondary MongoDB or Supabase) contains your backed-up collections, allowing you to restore or failover.',
+  },
+  {
+    question: 'Can I back up my production MongoDB to a free-tier MongoDB cluster?',
+    answer: 'Yes! That is one of the most popular setups. You can use your active production MongoDB as Primary and a free MongoDB Atlas (M0 cluster) or Supabase project as your Secondary backup target.',
   },
   {
     question: 'Can I use this with MySQL?',
-    answer: 'MySQL support is on the roadmap but not yet available. Currently, DB Guardian supports MongoDB and Supabase/PostgreSQL. If you need MySQL support, open an issue on our GitHub repository — community contributions are welcome!',
+    answer: 'MySQL support is on the roadmap. Currently, MongoDB and Supabase/PostgreSQL are fully supported.',
   },
 ];
 
 export default function DocsPage() {
-  const [activeSection, setActiveSection] = useState('getting-started');
+  const [activeSection, setActiveSection] = useState('beginner-guide');
   const contentRef = useRef(null);
 
   const scrollToSection = (id) => {
@@ -83,28 +89,91 @@ export default function DocsPage() {
           />
 
           <main className="docs-content" ref={contentRef}>
-            <h1 style={{ marginBottom: '8px' }}>Documentation</h1>
+            <h1 style={{ marginBottom: '8px' }}>Documentation & Complete Guide</h1>
             <p style={{ color: 'var(--text-muted)', marginBottom: '48px', fontSize: '1.05rem' }}>
-              Everything you need to set up and use DB Guardian in your project.
+              Step-by-step instructions for beginners and production MongoDB developers.
             </p>
 
-            {/* Getting Started */}
-            <section id="getting-started">
-              <h2>Getting Started</h2>
+            {/* Beginner Guide */}
+            <section id="beginner-guide">
+              <h2>Beginner Guide: What is this website & how to use it?</h2>
               <p>
-                DB Guardian is a Node.js package that automatically backs up your databases,
-                keeps free-tier services alive, and alerts you when something goes wrong.
-                Install it in under a minute.
+                If you are new here, welcome! <strong>NeverlostDB (DB Guardian)</strong> is a tool designed to solve a major problem faced by developers:
+                <strong> database data loss, crashes, and free-tier sleeping.</strong>
               </p>
 
-              <h3>Installation</h3>
+              <div className="callout callout-info">
+                <strong>What does this website do?</strong>
+                This website does <em>not</em> touch your database directly. Instead, it is a <strong>code generator</strong>. You select your database settings through our visual form, and we generate standard Node.js code that you copy and paste into your own backend application.
+              </div>
+
+              <h3>3 Simple Steps to Use NeverlostDB:</h3>
+              <ol>
+                <li>
+                  <strong>Configure:</strong> Go to the <a href="/configure">Configure Page</a> and tell us about your databases (e.g. MongoDB, Supabase), how often you want backups (e.g. every 1 hour), and where to send failure alerts.
+                </li>
+                <li>
+                  <strong>Copy Code:</strong> Click <em>Generate Code</em>. Copy the <code>.env.example</code> snippet and the <code>setup.js</code> code into your backend project.
+                </li>
+                <li>
+                  <strong>Run in Backend:</strong> Run <code>npm install db-guardian</code> and start the script in your Node.js backend server. Your databases are now automatically protected!
+                </li>
+              </ol>
+            </section>
+
+            {/* Production MongoDB Guide */}
+            <section id="production-mongodb-guide">
+              <h2>Step-by-Step: &quot;I already have data in MongoDB, what do I do next?&quot;</h2>
+              <p>
+                If you already have an existing project running on MongoDB with live data in production, here is your exact step-by-step roadmap to set up automatic backups and crash protection without disturbing your live users:
+              </p>
+
+              <div className="callout callout-success">
+                <strong>Goal:</strong> Safely replicate your live MongoDB data to a secondary database (like a free MongoDB Atlas cluster or Supabase) automatically.
+              </div>
+
+              <h3>Step 1: Get a Secondary (Backup) Database</h3>
+              <p>
+                To back up your existing MongoDB, you need a second place to store the copied data.
+              </p>
+              <ul>
+                <li>Create a free <strong>MongoDB Atlas</strong> cluster (M0 free tier) or a free <strong>Supabase</strong> project.</li>
+                <li>Copy the connection URL for this new backup database.</li>
+              </ul>
+
+              <h3>Step 2: Use the Generator Page</h3>
+              <p>
+                Open the <a href="/configure">Configure Page</a> on this website:
+              </p>
+              <ul>
+                <li>Select <strong>2 databases</strong>.</li>
+                <li>Set <strong>Database 1</strong> as <code>MongoDB</code> (Role: <em>Primary</em>) — paste your live MongoDB connection URL as a placeholder.</li>
+                <li>Set <strong>Database 2</strong> as <code>MongoDB</code> or <code>Supabase</code> (Role: <em>Secondary</em>) — paste your backup database connection URL.</li>
+                <li>Choose your backup interval (e.g. <em>Every 1 hour</em> or <em>Every 6 hours</em>).</li>
+                <li>Choose your backup mode:
+                  <ul>
+                    <li><strong>Mirror:</strong> Overwrites secondary so it is an exact twin of your live MongoDB.</li>
+                    <li><strong>Merge:</strong> Only adds new/changed records to secondary (safer if you never want data deleted from backup).</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <h3>Step 3: Add to Your Node.js Backend</h3>
+              <p>Open your existing Node.js project terminal and install the guardian package:</p>
               <CodeBlock code="npm install db-guardian" language="bash" filename="terminal" />
 
-              <h3>Quick Setup</h3>
-              <p>
-                Create a new file called <code>guardian.js</code> in your project root and add
-                this minimal configuration:
-              </p>
+              <p>Create a file named <code>.env</code> in your backend root directory and add your real database connection URLs:</p>
+              <CodeBlock
+                language="bash"
+                filename=".env"
+                code={`# Live Production MongoDB
+DB1_URL=mongodb+srv://admin:yourpassword@production.mongodb.net/my_live_db
+
+# Backup Database (Secondary)
+DB2_URL=mongodb+srv://admin:yourpassword@backup.mongodb.net/my_backup_db`}
+              />
+
+              <p>Create a file named <code>guardian.js</code> in your Node.js project and paste the generated code:</p>
               <CodeBlock
                 language="javascript"
                 filename="guardian.js"
@@ -114,322 +183,55 @@ require('dotenv').config();
 const guardian = new DBGuardian({
   databases: [
     {
-      name: "primary",
+      name: "live-production-mongo",
       type: "mongodb",
       url: process.env.DB1_URL,
       role: "primary",
     },
     {
-      name: "backup",
+      name: "backup-mongo",
       type: "mongodb",
       url: process.env.DB2_URL,
       role: "secondary",
     },
   ],
   backup: {
-    interval: "1h",
+    interval: "1h", // Backs up live MongoDB every hour
     mode: "mirror",
+  },
+  keepAlive: {
+    databases: { enabled: true }, // Keeps free-tier databases from sleeping
   },
 });
 
 guardian.start()
-  .then(() => console.log('DB Guardian is running!'))
-  .catch((err) => console.error('Failed to start:', err));`}
+  .then(() => console.log('✅ Production MongoDB protection active!'))
+  .catch((err) => console.error('❌ Protection error:', err));`}
               />
 
-              <div className="callout callout-info">
-                <strong>Tip</strong>
-                Use our <a href="/configure" style={{ color: 'inherit', textDecoration: 'underline' }}>Configure page</a> to generate
-                code tailored to your exact setup — no manual writing needed.
-              </div>
-            </section>
-
-            {/* Connecting MongoDB */}
-            <section id="connecting-mongodb">
-              <h2>Connecting MongoDB</h2>
-              <p>
-                DB Guardian connects to MongoDB using your connection string. This works with
-                MongoDB Atlas (including free-tier M0 clusters), self-hosted MongoDB, and any
-                MongoDB-compatible service.
-              </p>
-
-              <h3>Connection String Format</h3>
-              <CodeBlock
-                language="bash"
-                filename=".env"
-                code={`# MongoDB Atlas (most common)
-DB1_URL=mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/myDatabase
-
-# Self-hosted MongoDB
-DB1_URL=mongodb://username:password@localhost:27017/myDatabase`}
-              />
-
-              <h3>Configuration</h3>
-              <CodeBlock
-                language="javascript"
-                filename="guardian.js"
-                code={`{
-  name: "my-mongo-db",
-  type: "mongodb",
-  url: process.env.DB1_URL,
-  role: "primary",  // "primary", "secondary", or "backup-only"
-}`}
-              />
+              <h3>Step 4: Start Protection</h3>
+              <p>Run the guardian script alongside your application or as a background service on your server:</p>
+              <CodeBlock code="node guardian.js" language="bash" filename="terminal" />
 
               <div className="callout callout-warning">
-                <strong>Common Mistake</strong>
-                Make sure your MongoDB Atlas cluster has your server&apos;s IP address in the
-                Network Access whitelist. If you&apos;re on a dynamic IP (like Render or Railway),
-                add <code>0.0.0.0/0</code> to allow all connections.
+                <strong>Result:</strong> Your live production MongoDB data will now automatically sync to your backup database every hour in the background!
               </div>
             </section>
 
-            {/* Connecting Supabase */}
-            <section id="connecting-supabase">
-              <h2>Connecting Supabase</h2>
+            {/* Getting Started Quick Code */}
+            <section id="getting-started">
+              <h2>Quick Start Code Reference</h2>
               <p>
-                For Supabase and other PostgreSQL databases, use the direct connection string
-                (not the pooler URL unless you have many concurrent connections).
+                Here is the standard minimal setup code for reference:
               </p>
 
-              <h3>Finding Your Supabase URL</h3>
-              <p>
-                Go to your Supabase dashboard → Settings → Database → Connection string.
-                Use the <strong>URI</strong> format.
-              </p>
-              <CodeBlock
-                language="bash"
-                filename=".env"
-                code={`# Supabase direct connection
-DB1_URL=postgresql://postgres.xxxx:password@aws-0-us-east-1.pooler.supabase.com:5432/postgres
+              <h3>Installation</h3>
+              <CodeBlock code="npm install db-guardian" language="bash" filename="terminal" />
 
-# Standard PostgreSQL
-DB1_URL=postgresql://user:password@host:5432/database_name`}
-              />
-
-              <h3>Configuration</h3>
+              <h3>Minimal Setup</h3>
               <CodeBlock
                 language="javascript"
-                filename="guardian.js"
-                code={`{
-  name: "my-supabase-db",
-  type: "supabase",
-  url: process.env.DB1_URL,
-  role: "primary",
-}`}
-              />
-
-              <div className="callout callout-warning">
-                <strong>Common Mistake</strong>
-                Supabase free-tier projects pause after 7 days of inactivity. Use the
-                Keep-Alive feature to prevent this — it sends a lightweight query every
-                few minutes to keep your project active.
-              </div>
-            </section>
-
-            {/* Backup Modes */}
-            <section id="backup-modes">
-              <h2>Understanding Backup Modes</h2>
-              <p>
-                DB Guardian supports two backup modes. Choose based on your data strategy:
-              </p>
-
-              <h3>Mirror Mode</h3>
-              <p>
-                Completely replaces the data in the secondary database with the data from the
-                primary. After a mirror backup, both databases are identical.
-              </p>
-              <CodeBlock
-                language="javascript"
-                filename="mirror-config.js"
-                code={`backup: {
-  interval: "1h",
-  mode: "mirror",  // Secondary becomes an exact copy of primary
-}`}
-              />
-              <p>
-                <strong>Best for:</strong> Simple setups where you want an exact replica.
-                If you accidentally delete data from primary, you have a 1-hour window
-                (or whatever your interval is) to recover it from the secondary before
-                the next mirror operation.
-              </p>
-
-              <h3>Merge Mode</h3>
-              <p>
-                Only copies new or changed records to the secondary. Existing data in
-                the secondary is never deleted.
-              </p>
-              <CodeBlock
-                language="javascript"
-                filename="merge-config.js"
-                code={`backup: {
-  interval: "1h",
-  mode: "merge",  // Only adds new or updated records to secondary
-}`}
-              />
-              <p>
-                <strong>Best for:</strong> Append-only data (logs, events, analytics) or
-                when you want the secondary to accumulate all historical records even if
-                they&apos;re deleted from primary.
-              </p>
-
-              <div className="callout callout-info">
-                <strong>Tip</strong>
-                You can also limit backups to specific collections or tables using the
-                <code> collections</code> option:
-                <br />
-                <code>collections: [&quot;users&quot;, &quot;orders&quot;]</code>
-              </div>
-            </section>
-
-            {/* Keep-Alive */}
-            <section id="keep-alive">
-              <h2>Setting Up Keep-Alive</h2>
-              <p>
-                Free-tier hosting services (Render, Railway, Fly.io) and free-tier databases
-                (MongoDB Atlas M0, Supabase free) will sleep or pause after a period of
-                inactivity. Keep-Alive prevents this by sending periodic pings.
-              </p>
-
-              <h3>Backend Keep-Alive</h3>
-              <p>Keeps your deployed backend server from sleeping:</p>
-              <CodeBlock
-                language="javascript"
-                filename="keep-alive-config.js"
-                code={`keepAlive: {
-  backend: {
-    enabled: true,
-    url: process.env.BACKEND_URL,  // e.g. "https://my-app.onrender.com"
-    interval: "10m",               // Ping every 10 minutes
-  },
-}`}
-              />
-
-              <h3>Database Keep-Alive</h3>
-              <p>Sends lightweight queries to keep your databases from sleeping:</p>
-              <CodeBlock
-                language="javascript"
-                filename="db-keep-alive.js"
-                code={`keepAlive: {
-  databases: {
-    enabled: true,  // Pings all connected databases automatically
-  },
-}`}
-              />
-
-              <div className="callout callout-warning">
-                <strong>Common Mistake</strong>
-                Don&apos;t set the ping interval too low (under 5 minutes). Most free-tier
-                services consider this excessive and some may throttle or ban your requests.
-                10-15 minutes is usually the sweet spot.
-              </div>
-            </section>
-
-            {/* Failover */}
-            <section id="failover">
-              <h2>Setting Up Failover</h2>
-              <p>
-                Failover protection monitors your primary database and automatically detects
-                when it becomes unreachable. Combined with alerts, you&apos;ll know immediately
-                when something goes wrong.
-              </p>
-
-              <CodeBlock
-                language="javascript"
-                filename="failover-config.js"
-                code={`const guardian = new DBGuardian({
-  databases: [
-    { name: "primary", type: "mongodb", url: process.env.DB1_URL, role: "primary" },
-    { name: "failover", type: "mongodb", url: process.env.DB2_URL, role: "secondary" },
-  ],
-  backup: {
-    interval: "30m",
-    mode: "mirror",
-  },
-  alerts: {
-    enabled: true,
-    method: "telegram",
-    webhookUrl: process.env.ALERT_WEBHOOK,
-  },
-});
-
-// DB Guardian will:
-// 1. Back up primary → secondary every 30 minutes
-// 2. Monitor primary for connectivity issues
-// 3. Send a Telegram alert if primary goes down`}
-              />
-
-              <p>
-                Your application code should handle the actual switchover to the secondary
-                database. DB Guardian ensures the backup is fresh and alerts you when it&apos;s
-                time to switch.
-              </p>
-            </section>
-
-            {/* Alerts */}
-            <section id="alerts">
-              <h2>Setting Up Alerts</h2>
-              <p>
-                Get notified instantly when a backup fails, a database goes offline, or
-                any critical error occurs.
-              </p>
-
-              <h3>Telegram</h3>
-              <CodeBlock
-                language="javascript"
-                filename="telegram-alerts.js"
-                code={`alerts: {
-  enabled: true,
-  method: "telegram",
-  webhookUrl: "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/sendMessage",
-  // Chat ID is configured via the ALERT_WEBHOOK env var
-}`}
-              />
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                Create a bot via <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer">@BotFather</a> on Telegram to get your bot token.
-              </p>
-
-              <h3>Slack</h3>
-              <CodeBlock
-                language="javascript"
-                filename="slack-alerts.js"
-                code={`alerts: {
-  enabled: true,
-  method: "slack",
-  webhookUrl: process.env.ALERT_WEBHOOK,
-  // Use a Slack Incoming Webhook URL
-}`}
-              />
-
-              <h3>Email</h3>
-              <CodeBlock
-                language="javascript"
-                filename="email-alerts.js"
-                code={`alerts: {
-  enabled: true,
-  method: "email",
-  email: process.env.ALERT_WEBHOOK,  // Your email address
-}`}
-              />
-
-              <div className="callout callout-warning">
-                <strong>Common Mistake</strong>
-                Don&apos;t hardcode webhook URLs or tokens in your source code. Always use
-                environment variables and keep them in your <code>.env</code> file.
-              </div>
-            </section>
-
-            {/* Restoring */}
-            <section id="restoring">
-              <h2>Restoring From Backup</h2>
-              <p>
-                If your primary database loses data, you can restore from your secondary
-                (backup) database. DB Guardian provides a simple restore command.
-              </p>
-
-              <CodeBlock
-                language="javascript"
-                filename="restore.js"
+                filename="setup.js"
                 code={`const { DBGuardian } = require('db-guardian');
 require('dotenv').config();
 
@@ -438,24 +240,94 @@ const guardian = new DBGuardian({
     { name: "primary", type: "mongodb", url: process.env.DB1_URL, role: "primary" },
     { name: "backup", type: "mongodb", url: process.env.DB2_URL, role: "secondary" },
   ],
+  backup: { interval: "1h", mode: "mirror" },
 });
 
-// Restore: copy all data from secondary back to primary
-guardian.restore({
-  from: "backup",   // source database name
-  to: "primary",    // target database name
-  mode: "mirror",   // "mirror" for full restore, "merge" for selective
-})
-  .then(() => console.log('Restore complete!'))
-  .catch((err) => console.error('Restore failed:', err));`}
+guardian.start();`}
               />
+            </section>
 
-              <div className="callout callout-danger">
-                <strong>Warning</strong>
-                A mirror restore will overwrite ALL data in the target database. Make sure
-                you&apos;re restoring to the correct database. Consider doing a manual backup
-                of the target first.
-              </div>
+            {/* Connecting MongoDB */}
+            <section id="connecting-mongodb">
+              <h2>Connecting MongoDB</h2>
+              <p>
+                DB Guardian connects to MongoDB using standard connection strings. Works with MongoDB Atlas, self-hosted instances, or local MongoDB.
+              </p>
+
+              <h3>Connection String Formats</h3>
+              <CodeBlock
+                language="bash"
+                filename=".env"
+                code={`# MongoDB Atlas
+DB1_URL=mongodb+srv://username:password@cluster.mongodb.net/dbname
+
+# Local or Self-Hosted
+DB1_URL=mongodb://username:password@127.0.0.1:27017/dbname`}
+              />
+            </section>
+
+            {/* Connecting Supabase */}
+            <section id="connecting-supabase">
+              <h2>Connecting Supabase</h2>
+              <p>
+                For Supabase or PostgreSQL databases, use the direct PostgreSQL URI from your Supabase project settings.
+              </p>
+
+              <CodeBlock
+                language="bash"
+                filename=".env"
+                code={`# Supabase PostgreSQL URI
+DB1_URL=postgresql://postgres.xxx:password@aws-0-us-east-1.pooler.supabase.com:5432/postgres`}
+              />
+            </section>
+
+            {/* Backup Modes */}
+            <section id="backup-modes">
+              <h2>Understanding Backup Modes</h2>
+              <h3>Mirror Mode</h3>
+              <p>Overwrites the secondary database so it becomes an exact twin of your primary database.</p>
+
+              <h3>Merge Mode</h3>
+              <p>Only appends new or modified records. Existing data in secondary is never deleted.</p>
+            </section>
+
+            {/* Keep-Alive */}
+            <section id="keep-alive">
+              <h2>Setting Up Keep-Alive</h2>
+              <p>Prevents Render, Railway, Fly.io, or MongoDB Atlas free-tier projects from sleeping by sending periodic pings.</p>
+
+              <CodeBlock
+                language="javascript"
+                filename="keepalive.js"
+                code={`keepAlive: {
+  backend: { enabled: true, url: process.env.BACKEND_URL, interval: "10m" },
+  databases: { enabled: true },
+}`}
+              />
+            </section>
+
+            {/* Failover */}
+            <section id="failover">
+              <h2>Setting Up Failover</h2>
+              <p>Monitors primary database connection status and triggers alerts immediately if connection drops.</p>
+            </section>
+
+            {/* Alerts */}
+            <section id="alerts">
+              <h2>Alerts Setup</h2>
+              <p>Supported alert providers: Telegram, Slack, and Email webhooks.</p>
+            </section>
+
+            {/* Restoring */}
+            <section id="restoring">
+              <h2>Restoring From Backup</h2>
+              <p>To restore your primary database from your secondary backup database:</p>
+              <CodeBlock
+                language="javascript"
+                filename="restore.js"
+                code={`guardian.restore({ from: "backup", to: "primary", mode: "mirror" })
+  .then(() => console.log('Restore complete!'));`}
+              />
             </section>
 
             {/* FAQ */}
