@@ -314,8 +314,53 @@ DB1_URL=postgresql://postgres.xxx:password@aws-0-us-east-1.pooler.supabase.com:5
 
             {/* Alerts */}
             <section id="alerts">
-              <h2>Alerts Setup</h2>
-              <p>Supported alert providers: Telegram, Slack, and Email webhooks.</p>
+              <h2>Alerts & Email Setup (SMTP)</h2>
+              <p>
+                Get notified immediately via Email, Telegram, or Slack if a backup fails or your primary database crashes.
+              </p>
+
+              <h3>Configuring Email Alerts with SMTP</h3>
+              <p>
+                To receive emails when something goes wrong with your backup, provide your recipient email address and your SMTP server details in your <code>.env</code> file:
+              </p>
+
+              <CodeBlock
+                language="bash"
+                filename=".env"
+                code={`# Email Alert Settings
+ALERT_RECIPIENT_EMAIL=your-email@example.com
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-sender-email@gmail.com
+SMTP_PASS=your-app-password`}
+              />
+
+              <h3>JavaScript Setup Code</h3>
+              <CodeBlock
+                language="javascript"
+                filename="guardian.js"
+                code={`const guardian = new DBGuardian({
+  databases: [/* your databases */],
+  backup: { interval: "1h", mode: "mirror" },
+  alerts: {
+    enabled: true,
+    method: "email",
+    recipientEmail: process.env.ALERT_RECIPIENT_EMAIL,
+    smtp: {
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT || 587,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    },
+  },
+});`}
+              />
+
+              <div className="callout callout-info">
+                <strong>Gmail Tip:</strong> If using Gmail SMTP, generate an <em>App Password</em> in your Google Account security settings and set it as <code>SMTP_PASS</code>.
+              </div>
             </section>
 
             {/* Restoring */}

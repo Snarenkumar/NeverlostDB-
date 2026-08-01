@@ -40,8 +40,13 @@ export default function ConfigurePage() {
     },
     alerts: {
       enabled: false,
-      method: 'telegram',
+      method: 'email',
       webhook: '',
+      recipientEmail: '',
+      smtpHost: '',
+      smtpPort: '587',
+      smtpUser: '',
+      smtpPass: '',
     },
   });
 
@@ -108,8 +113,13 @@ export default function ConfigurePage() {
       },
       alerts: {
         enabled: false,
-        method: 'telegram',
+        method: 'email',
         webhook: '',
+        recipientEmail: '',
+        smtpHost: '',
+        smtpPort: '587',
+        smtpUser: '',
+        smtpPass: '',
       },
     });
   };
@@ -364,25 +374,97 @@ export default function ConfigurePage() {
                       </div>
                     </div>
 
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="alert-webhook">
-                        {formData.alerts.method === 'email' ? 'Email Address' : `${formData.alerts.method.charAt(0).toUpperCase() + formData.alerts.method.slice(1)} Webhook URL`}
-                      </label>
-                      <input
-                        id="alert-webhook"
-                        type="text"
-                        className="form-input"
-                        placeholder={
-                          formData.alerts.method === 'email'
-                            ? 'you@example.com'
-                            : formData.alerts.method === 'telegram'
-                            ? 'https://api.telegram.org/bot<token>/sendMessage'
-                            : 'https://hooks.slack.com/services/...'
-                        }
-                        value={formData.alerts.webhook}
-                        onChange={(e) => updateField('alerts', 'webhook', e.target.value)}
-                      />
-                    </div>
+                    {formData.alerts.method === 'email' ? (
+                      <>
+                        <div className="form-group" style={{ marginBottom: '16px' }}>
+                          <label className="form-label" htmlFor="alert-recipient-email">
+                            Recipient Email Address (Where to send alerts)
+                          </label>
+                          <input
+                            id="alert-recipient-email"
+                            type="email"
+                            className="form-input"
+                            placeholder="alerts-admin@example.com"
+                            value={formData.alerts.recipientEmail}
+                            onChange={(e) => updateField('alerts', 'recipientEmail', e.target.value)}
+                          />
+                        </div>
+
+                        <div style={{ marginTop: '16px', padding: '12px', background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                          <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: '12px', color: 'var(--text-primary)' }}>
+                            SMTP Server Configuration (For sending emails)
+                          </div>
+                          
+                          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                            <div className="form-group">
+                              <label className="form-label" htmlFor="smtp-host">SMTP Host</label>
+                              <input
+                                id="smtp-host"
+                                type="text"
+                                className="form-input"
+                                placeholder="smtp.gmail.com"
+                                value={formData.alerts.smtpHost}
+                                onChange={(e) => updateField('alerts', 'smtpHost', e.target.value)}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label className="form-label" htmlFor="smtp-port">SMTP Port</label>
+                              <input
+                                id="smtp-port"
+                                type="text"
+                                className="form-input"
+                                placeholder="587"
+                                value={formData.alerts.smtpPort}
+                                onChange={(e) => updateField('alerts', 'smtpPort', e.target.value)}
+                              />
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                            <div className="form-group">
+                              <label className="form-label" htmlFor="smtp-user">SMTP Username / Email</label>
+                              <input
+                                id="smtp-user"
+                                type="text"
+                                className="form-input"
+                                placeholder="your-sender-email@gmail.com"
+                                value={formData.alerts.smtpUser}
+                                onChange={(e) => updateField('alerts', 'smtpUser', e.target.value)}
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label className="form-label" htmlFor="smtp-pass">SMTP Password / App Password</label>
+                              <input
+                                id="smtp-pass"
+                                type="password"
+                                className="form-input"
+                                placeholder="••••••••••••"
+                                value={formData.alerts.smtpPass}
+                                onChange={(e) => updateField('alerts', 'smtpPass', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="form-group">
+                        <label className="form-label" htmlFor="alert-webhook">
+                          {`${formData.alerts.method.charAt(0).toUpperCase() + formData.alerts.method.slice(1)} Webhook URL`}
+                        </label>
+                        <input
+                          id="alert-webhook"
+                          type="text"
+                          className="form-input"
+                          placeholder={
+                            formData.alerts.method === 'telegram'
+                              ? 'https://api.telegram.org/bot<token>/sendMessage'
+                              : 'https://hooks.slack.com/services/...'
+                          }
+                          value={formData.alerts.webhook}
+                          onChange={(e) => updateField('alerts', 'webhook', e.target.value)}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
